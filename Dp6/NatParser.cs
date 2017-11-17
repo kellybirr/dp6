@@ -8,7 +8,8 @@ namespace Dp6
 {
     class NatParser
     {
-        private readonly Regex _rxTcp = new Regex(@"^\s+(?<id>\d+)\s+TCP\s+(?<ext>\d+)\s+(?<int>\d+)\s+(?<ip>\d+\.\d+\.\d+\.\d+)\s*$");
+        //private readonly Regex _rxTcp = new Regex(@"^\s+(?<id>\d+)\s+TCP\s+(?<ext>\d+)\s+(?<int>\d+)\s+(?<ip>\d+\.\d+\.\d+\.\d+)\s*$");
+        private readonly Regex _rxTcp = new Regex(@"\s+(?<ip>\d+\.\d+\.\d+\.\d+)\:(?<ext>\d+)\-\>(?<int>\d+)\/tcp", RegexOptions.IgnoreCase);
 
         public IList<NatMapping> NatMappings { get; }
 
@@ -25,9 +26,9 @@ namespace Dp6
                 CreateNoWindow = true,
                 LoadUserProfile = false,
                 RedirectStandardOutput = true,
-                FileName = "PowerShell.exe",
+                FileName = "Docker.exe",
                 WindowStyle = ProcessWindowStyle.Hidden,
-                Arguments = "\"Get-NetNatStaticMapping | FT StaticMappingID,Protocol,ExternalPort,InternalPort,InternalIpAddress\""
+                Arguments = "ps"
             };
 
             var process = new Process {StartInfo = startInfo};
@@ -50,7 +51,6 @@ namespace Dp6
             {
                 NatMappings.Add(new NatMapping
                 {
-                    Id  = int.Parse(m.Groups["id"].Value),
                     Protocol = "TCP",
                     ExternalPort = int.Parse(m.Groups["ext"].Value),
                     InternalPort = Int32.Parse(m.Groups["int"].Value),
@@ -62,7 +62,6 @@ namespace Dp6
 
     class NatMapping : IEquatable<NatMapping>
     {
-        public int Id { get; set; }
         public string Protocol { get; set; }
         public int ExternalPort { get; set; }
         public int InternalPort { get; set; }
